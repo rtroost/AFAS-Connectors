@@ -1,4 +1,4 @@
-# AFAS-Connectors
+# AFAS Connector Helpers
 
 ## Gegevens selecteren
 ```

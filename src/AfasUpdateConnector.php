@@ -19,6 +19,7 @@ class AfasUpdateConnector extends AfasConnector {
 
         parent::setExtraOptions( [
             'connectorType' => $this->connector,
+            'connectorVersion' => '1',
             'dataXml' => $xml
         ] );
 
@@ -72,12 +73,12 @@ class AfasUpdateConnector extends AfasConnector {
                     $lines = array_merge( $lines, $this->transformArrayToXml( $action, $value ) );
                     $lines[ ] = '</Fields></Element>';
                 } else {
-                    $lines[ ] = '<' . $field . '><Element><Fields Action="update">';
+                    $lines[ ] = '<' . $field . '><Element><Fields Action="insert">';
                     $lines = array_merge( $lines, $this->transformArrayToXml( $action, $value ) );
                     $lines[ ] = '</Fields></Element></' . $field . '>';
                 }
             } else {
-                if($value !== '')
+                if( $value !== '' )
                     $lines[ ] = '<' . $field . '>' . $value . '</' . $field . '>';
                 else
                     $lines[ ] = '<' . $field . ' xsi:nil="true"/>';

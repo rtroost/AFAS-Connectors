@@ -1,6 +1,6 @@
 <?php namespace App\Afas;
 
-class AfasConnector {
+abstract class AfasConnector {
 
     protected $client;
 
@@ -51,7 +51,8 @@ class AfasConnector {
     public function __construct()
     {
         $this->client = new \nusoap_client( $this->url, true, false, false, false, false, 300, 300 );
-    }
+        $this->client->setDebugLevel(0);
+	}
 
     public function request( $method )
     {
@@ -75,20 +76,22 @@ class AfasConnector {
         try {
             $result = $this->client->call( $method, $options );
         } catch( \Exception $e ) {
+            $this->errors[ 'message' ] = 'An exception was caught during the transaction.';
             $this->errors[ 'clientError' ] = $this->client->getError();
-
-            //            dd($this->client->debug_str);
             $this->errors[ 'exception' ] = $e;
             return false;
         }
 
         // Check for any errors from the remote service
         if( $this->client->fault ) {
-            $this->errors[ 'message' ] = 'Transactie voltooid maar met errors.';
+            $this->errors[ 'message' ] = 'Transaction completed but returned with errors.';
+            // $this->errors[ 'clientError' ] = $this->client->getError();
+            $this->errors[ 'faultCode' ] = $this->client->faultcode;
+            $this->errors[ 'faultString' ] = $this->client->faultstring;
+            $this->errors[ 'faultDetail' ] = $this->client->faultdetail;
             return false;
         }
 
-        //        $this->lastResult = $result ? $result : [ ];
         $this->lastResult = $result;
 
         return $result;
@@ -166,7 +169,7 @@ class AfasConnector {
         if( !is_array( $options[ 0 ] ) )
             $options = [ $options ];
 
-        $this->extraOptions = array_merge($this->extraOptions, $options);
+        $this->extraOptions = array_merge( $this->extraOptions, $options );
     }
 
     public function getLastResult()
